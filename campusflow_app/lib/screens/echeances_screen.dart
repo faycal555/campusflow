@@ -1,12 +1,12 @@
 import 'package:campusflow_models/campusflow_models.dart';
 import 'package:flutter/material.dart';
+import 'package:go_router/go_router.dart';
 
 import '../data/sample_data.dart';
+import '../router/app_router.dart';
 import '../utils/task_utils.dart';
 import '../widgets/task_detail_view.dart';
 import '../widgets/task_tile.dart';
-import 'task_detail_screen.dart';
-import 'task_form_screen.dart';
 
 /// Largeur à partir de laquelle on affiche la liste et le détail côte à côte.
 const tabletBreakpoint = 840.0;
@@ -21,7 +21,6 @@ class EcheancesScreen extends StatefulWidget {
 
 class _EcheancesScreenState extends State<EcheancesScreen> {
   List<Task> _tasks = buildSampleTasks();
-  int _navIndex = 0;
   String? _selectedId;
 
   List<Task> get _sortedTasks =>
@@ -35,28 +34,9 @@ class _EcheancesScreenState extends State<EcheancesScreen> {
     });
   }
 
-  void _openDetail(Task task) {
-    Navigator.of(context).push(
-      MaterialPageRoute(
-        builder: (_) => TaskDetailScreen(
-          task: task,
-          courseName: courseName(sampleCourses, task.courseId),
-          onChanged: (updated) => _toggle(updated, updated.isDone),
-        ),
-      ),
-    );
-  }
+  void _openDetail(Task task) => context.push(Routes.tache(task.id));
 
-  void _openForm() {
-    Navigator.of(context).push(
-      MaterialPageRoute(
-        builder: (_) => TaskFormScreen(
-          courses: sampleCourses,
-          onSubmit: (task) async => setState(() => _tasks = [..._tasks, task]),
-        ),
-      ),
-    );
-  }
+  void _openForm() => context.push(Routes.nouvelleTache);
 
   Widget _buildList(List<Task> tasks, {required bool wide}) {
     return ListView.builder(
@@ -114,21 +94,6 @@ class _EcheancesScreenState extends State<EcheancesScreen> {
         tooltip: 'Ajouter une tâche',
         onPressed: _openForm,
         child: const Icon(Icons.add),
-      ),
-      bottomNavigationBar: NavigationBar(
-        selectedIndex: _navIndex,
-        onDestinationSelected: (i) => setState(() => _navIndex = i),
-        destinations: const [
-          NavigationDestination(icon: Icon(Icons.checklist), label: 'Tâches'),
-          NavigationDestination(
-            icon: Icon(Icons.school_outlined),
-            label: 'Cours',
-          ),
-          NavigationDestination(
-            icon: Icon(Icons.person_outline),
-            label: 'Profil',
-          ),
-        ],
       ),
     );
   }

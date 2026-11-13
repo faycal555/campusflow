@@ -18,6 +18,12 @@ const sampleCourses = [
   ),
 ];
 
+const sampleUser = User(
+  id: 'u1',
+  name: 'Aminata Ouédraogo',
+  email: 'aminata@campus.bf',
+);
+
 List<Task> buildSampleTasks() {
   final today = DateTime.now();
   DateTime inDays(int days) =>
