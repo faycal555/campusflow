@@ -1,6 +1,8 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android">
+    <!-- Nécessaire en release pour appeler l'API (ajouté automatiquement en debug). -->
+    <uses-permission android:name="android.permission.INTERNET"/>
     <application
-        android:label="campusflow_app"
+        android:label="CampusFlow"
         android:name="${applicationName}"
         android:icon="@mipmap/ic_launcher">
         <activity
