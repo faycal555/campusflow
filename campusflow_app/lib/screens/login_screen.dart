@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/intl.dart';
 
+import '../core/demo_mode.dart';
 import '../data/auth_repository.dart';
 import '../state/auth_notifier.dart';
 import '../theme/app_theme.dart';
@@ -143,6 +144,16 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                             )
                           : const Text('Se connecter'),
                     ),
+                    if (demoMode) ...[
+                      const SizedBox(height: Spacing.m),
+                      Text(
+                        'Mode démo : données locales, sans serveur',
+                        textAlign: TextAlign.center,
+                        style: theme.textTheme.labelLarge?.copyWith(
+                          color: theme.colorScheme.primary,
+                        ),
+                      ),
+                    ],
                     const SizedBox(height: Spacing.m),
                     Text(
                       'Compte de démonstration : aminata@campus.bf / campus2026',
