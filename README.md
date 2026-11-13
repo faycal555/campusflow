@@ -14,10 +14,9 @@ L'historique Git suit la progression : **un commit par TP** (`git log --reverse`
 
 **Compte de démonstration :** `aminata@campus.bf` / `campus2026`
 
-- **Rapide (sans serveur) :** installer `campusflow-demo.apk` depuis la page
-  [Releases](../../releases) sur un téléphone Android. Ce mode démo utilise des
-  données en mémoire (`FakeTaskRepository`) : tous les écrans sont testables,
-  les données reviennent à l'état initial au redémarrage.
+- **Rapide (sans serveur) :** `cd campusflow_app && flutter run --dart-define=DEMO=true`.
+  Ce mode démo utilise des données en mémoire (`FakeTaskRepository`) : tous les
+  écrans sont testables, les données reviennent à l'état initial au redémarrage.
 - **Complet (avec l'API, séance 7) :** lancer le serveur puis l'application,
   voir [Lancer le projet](#lancer-le-projet).
 
