@@ -16,4 +16,14 @@ Future<void> main() async {
 
   final done = tasks.first.copyWith(isDone: true);
   print('Après copyWith : $done');
+
+  // Un serveur qui renvoie des données invalides : l'erreur est rattrapée.
+  const brokenRepository = CampusFlowRepository(
+    rawJson: '{"tasks": [{"id": "t9", "title": "Sans date"}]}',
+  );
+  try {
+    await brokenRepository.fetchTasks();
+  } on FormatException catch (e) {
+    print('Erreur attendue rattrapée : ${e.message}');
+  }
 }
