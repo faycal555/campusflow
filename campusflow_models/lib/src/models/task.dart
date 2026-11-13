@@ -37,6 +37,15 @@ class Task {
     );
   }
 
+  /// Inverse de [Task.fromJson], utilisé pour envoyer une tâche à l'API.
+  Map<String, dynamic> toJson() => {
+    'id': id,
+    'title': title,
+    'courseId': courseId,
+    'dueDate': dueDate.toIso8601String(),
+    'isDone': isDone,
+  };
+
   /// Retourne une nouvelle tâche en ne remplaçant que les champs fournis.
   Task copyWith({
     String? id,
