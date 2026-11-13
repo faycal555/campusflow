@@ -1,0 +1,11 @@
+# Système
+.DS_Store
+Thumbs.db
+
+# Éditeurs
+.idea/
+.vscode/
+*.iml
+
+# Node (serveur json-server)
+node_modules/
