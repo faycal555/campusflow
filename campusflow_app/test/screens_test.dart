@@ -55,6 +55,10 @@ void main() {
     expect(find.text('Faite'), findsOneWidget);
     goTo(tester, '/taches');
     await tester.pumpAndSettle();
+    // Elle a quitté « À faire » et apparaît cochée dans « Faites ».
+    expect(find.text('Exercices SQL'), findsNothing);
+    await tester.tap(find.textContaining('Faites'));
+    await tester.pumpAndSettle();
     final tile = find.ancestor(
       of: find.text('Exercices SQL'),
       matching: find.byType(ListTile),
@@ -63,6 +67,24 @@ void main() {
       find.descendant(of: tile, matching: find.byType(Checkbox)),
     );
     expect(checkbox.value, isTrue);
+  });
+
+  testWidgets('Les trois filtres : à faire, faites, en retard', (tester) async {
+    await pumpApp(tester);
+    // Données d'exemple : 4 tâches non faites dont 1 en retard, 1 faite.
+    expect(find.text('À faire (4)'), findsOneWidget);
+    expect(find.text('Faites (1)'), findsOneWidget);
+    expect(find.text('En retard (1)'), findsOneWidget);
+    expect(find.text('Lecture chapitre 2'), findsNothing);
+
+    await tester.tap(find.text('En retard (1)'));
+    await tester.pumpAndSettle();
+    expect(find.text('Rapport de stage (plan)'), findsOneWidget);
+    expect(find.text('Exercices SQL'), findsNothing);
+
+    await tester.tap(find.text('Faites (1)'));
+    await tester.pumpAndSettle();
+    expect(find.text('Lecture chapitre 2'), findsOneWidget);
   });
 
   testWidgets('Chaque écran est accessible par son adresse', (tester) async {

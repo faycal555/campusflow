@@ -4,7 +4,9 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
 import '../router/app_router.dart';
+import '../state/filtres.dart';
 import '../state/taches_notifier.dart';
+import '../theme/app_theme.dart';
 import '../utils/task_utils.dart';
 import '../widgets/task_detail_view.dart';
 import '../widgets/task_tile.dart';
@@ -65,34 +67,76 @@ class _EcheancesScreenState extends ConsumerState<EcheancesScreen> {
   @override
   Widget build(BuildContext context) {
     // ref.watch dans build : l'écran se reconstruit quand la liste change.
-    final tasks = [...ref.watch(tachesProvider)]
-      ..sort((a, b) => a.dueDate.compareTo(b.dueDate));
+    final tasks = ref.watch(tachesFiltreesProvider);
+    final allTasks = ref.watch(tachesProvider);
     final courses = ref.watch(coursProvider);
     return Scaffold(
       appBar: AppBar(title: const Text('Mes échéances')),
-      body: LayoutBuilder(
-        builder: (context, constraints) {
-          if (constraints.maxWidth < tabletBreakpoint) {
-            return _buildList(tasks, courses, wide: false);
-          }
-          // Au-dessus de 840 dp : liste et détail côte à côte.
-          return Row(
-            crossAxisAlignment: CrossAxisAlignment.stretch,
-            children: [
-              SizedBox(
-                width: 400,
-                child: _buildList(tasks, courses, wide: true),
-              ),
-              const VerticalDivider(width: 1),
-              Expanded(child: _buildDetailPane(tasks, courses)),
-            ],
-          );
-        },
+      body: Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          const _FiltresBar(),
+          Expanded(
+            child: LayoutBuilder(
+              builder: (context, constraints) {
+                final list = tasks.isEmpty
+                    ? const Center(child: Text('Aucune tâche dans ce filtre'))
+                    : _buildList(
+                        tasks,
+                        courses,
+                        wide: constraints.maxWidth >= tabletBreakpoint,
+                      );
+                if (constraints.maxWidth < tabletBreakpoint) return list;
+                // Au-dessus de 840 dp : liste et détail côte à côte.
+                return Row(
+                  crossAxisAlignment: CrossAxisAlignment.stretch,
+                  children: [
+                    SizedBox(width: 400, child: list),
+                    const VerticalDivider(width: 1),
+                    // Le détail reste affiché même si la tâche sort du filtre.
+                    Expanded(child: _buildDetailPane(allTasks, courses)),
+                  ],
+                );
+              },
+            ),
+          ),
+        ],
       ),
       floatingActionButton: FloatingActionButton(
         tooltip: 'Ajouter une tâche',
         onPressed: () => context.push(Routes.nouvelleTache),
         child: const Icon(Icons.add),
+      ),
+    );
+  }
+}
+
+/// Les trois filtres (À faire / Faites / En retard) avec leur compteur.
+class _FiltresBar extends ConsumerWidget {
+  const _FiltresBar();
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final selected = ref.watch(filtreProvider);
+    final compteurs = ref.watch(compteursProvider);
+    return SingleChildScrollView(
+      scrollDirection: Axis.horizontal,
+      padding: const EdgeInsets.symmetric(
+        horizontal: Spacing.m,
+        vertical: Spacing.s,
+      ),
+      child: Row(
+        children: [
+          for (final filtre in Filtre.values) ...[
+            ChoiceChip(
+              label: Text('${filtre.label} (${compteurs[filtre]})'),
+              selected: filtre == selected,
+              onSelected: (_) =>
+                  ref.read(filtreProvider.notifier).choisir(filtre),
+            ),
+            const SizedBox(width: Spacing.s),
+          ],
+        ],
       ),
     );
   }
