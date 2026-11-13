@@ -33,17 +33,22 @@ final filtreProvider = NotifierProvider<FiltreNotifier, Filtre>(
 
 /// Fournisseur dérivé : les tâches du filtre courant, triées par date.
 ///
-/// Il est recalculé automatiquement quand la liste ou le filtre change.
-final tachesFiltreesProvider = Provider<List<Task>>((ref) {
+/// Il conserve les états chargement / erreur de la liste source.
+final tachesFiltreesProvider = Provider<AsyncValue<List<Task>>>((ref) {
   final filtre = ref.watch(filtreProvider);
   final now = DateTime.now();
-  return ref.watch(tachesProvider).where((t) => filtre.accepte(t, now)).toList()
-    ..sort((a, b) => a.dueDate.compareTo(b.dueDate));
+  return ref
+      .watch(tachesProvider)
+      .whenData(
+        (tasks) =>
+            tasks.where((t) => filtre.accepte(t, now)).toList()
+              ..sort((a, b) => a.dueDate.compareTo(b.dueDate)),
+      );
 });
 
 /// Nombre de tâches pour chacun des trois filtres.
 final compteursProvider = Provider<Map<Filtre, int>>((ref) {
-  final tasks = ref.watch(tachesProvider);
+  final tasks = ref.watch(tachesProvider).value ?? const [];
   final now = DateTime.now();
   return {
     for (final f in Filtre.values)

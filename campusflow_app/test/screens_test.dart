@@ -1,15 +1,42 @@
+import 'package:campusflow_app/data/fake_repositories.dart';
+import 'package:campusflow_app/data/repository_providers.dart';
+import 'package:campusflow_app/data/task_repository.dart';
 import 'package:campusflow_app/main.dart';
+import 'package:campusflow_models/campusflow_models.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:go_router/go_router.dart';
 import 'package:intl/date_symbol_data_local.dart';
 
-/// Lance l'application et passe l'écran de connexion.
-Future<void> pumpApp(WidgetTester tester) async {
-  await tester.pumpWidget(const ProviderScope(child: CampusFlowApp()));
+/// Lance l'application avec des repositories en mémoire (aucun réseau) et
+/// passe l'écran de connexion.
+Future<void> pumpApp(WidgetTester tester, {TaskRepository? tasks}) async {
+  await tester.pumpWidget(
+    ProviderScope(
+      overrides: [
+        taskRepositoryProvider.overrideWithValue(tasks ?? FakeTaskRepository()),
+        courseRepositoryProvider.overrideWithValue(FakeCourseRepository()),
+      ],
+      child: const CampusFlowApp(),
+    ),
+  );
   await tester.tap(find.text('Se connecter'));
   await tester.pumpAndSettle();
+}
+
+/// Repository qui échoue au premier chargement puis fonctionne.
+class _FlakyRepository extends FakeTaskRepository {
+  bool _failed = false;
+
+  @override
+  Future<List<Task>> fetchAll() async {
+    if (!_failed) {
+      _failed = true;
+      throw const FormatException('réponse invalide');
+    }
+    return super.fetchAll();
+  }
 }
 
 void goTo(WidgetTester tester, String location) {
@@ -85,6 +112,33 @@ void main() {
     await tester.tap(find.text('Faites (1)'));
     await tester.pumpAndSettle();
     expect(find.text('Lecture chapitre 2'), findsOneWidget);
+  });
+
+  testWidgets('Erreur de chargement puis « Réessayer »', (tester) async {
+    await pumpApp(tester, tasks: _FlakyRepository());
+    expect(find.text('Données reçues invalides.'), findsOneWidget);
+
+    await tester.tap(find.text('Réessayer'));
+    await tester.pumpAndSettle();
+    expect(find.text('Exercices SQL'), findsOneWidget);
+  });
+
+  testWidgets('Suppression depuis le détail (DELETE)', (tester) async {
+    final repo = FakeTaskRepository();
+    await pumpApp(tester, tasks: repo);
+    await tester.tap(find.text('Exercices SQL'));
+    await tester.pumpAndSettle();
+
+    await tester.tap(find.text('Supprimer'));
+    await tester.pumpAndSettle();
+    await tester.tap(find.widgetWithText(TextButton, 'Supprimer'));
+    await tester.pumpAndSettle();
+
+    expect(find.text('Mes échéances'), findsOneWidget);
+    expect(find.text('Exercices SQL'), findsNothing);
+    // runAsync : le temps est simulé dans testWidgets, Future.delayed n'avancerait pas.
+    final remaining = await tester.runAsync(repo.fetchAll);
+    expect(remaining!.any((t) => t.title == 'Exercices SQL'), isFalse);
   });
 
   testWidgets('Chaque écran est accessible par son adresse', (tester) async {

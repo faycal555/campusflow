@@ -8,6 +8,7 @@ import '../state/filtres.dart';
 import '../state/taches_notifier.dart';
 import '../theme/app_theme.dart';
 import '../utils/task_utils.dart';
+import '../widgets/async_views.dart';
 import '../widgets/task_detail_view.dart';
 import '../widgets/task_tile.dart';
 
@@ -27,28 +28,44 @@ class _EcheancesScreenState extends ConsumerState<EcheancesScreen> {
   String? _selectedId;
 
   // ref.read dans les gestionnaires d'action.
-  void _cocher(Task task) => ref.read(tachesProvider.notifier).cocher(task.id);
+  Future<void> _cocher(Task task) => runAction(
+    context,
+    () => ref.read(tachesProvider.notifier).cocher(task.id),
+  );
+
+  Future<void> _supprimer(Task task) async {
+    final ok = await runAction(
+      context,
+      () => ref.read(tachesProvider.notifier).supprimer(task.id),
+      success: 'Tâche « ${task.title} » supprimée',
+    );
+    if (ok) setState(() => _selectedId = null);
+  }
 
   Widget _buildList(
     List<Task> tasks,
     List<Course> courses, {
     required bool wide,
   }) {
-    return ListView.builder(
-      itemCount: tasks.length,
-      itemBuilder: (context, index) {
-        final task = tasks[index];
-        return TaskTile(
-          task: task,
-          courseName: courseName(courses, task.courseId),
-          selected: wide && task.id == _selectedId,
-          // Sur tablette, la sélection remplit le panneau de droite.
-          onTap: wide
-              ? () => setState(() => _selectedId = task.id)
-              : () => context.push(Routes.tache(task.id)),
-          onToggle: (_) => _cocher(task),
-        );
-      },
+    return RefreshIndicator(
+      onRefresh: () => ref.refresh(tachesProvider.future),
+      child: ListView.builder(
+        physics: const AlwaysScrollableScrollPhysics(),
+        itemCount: tasks.length,
+        itemBuilder: (context, index) {
+          final task = tasks[index];
+          return TaskTile(
+            task: task,
+            courseName: courseName(courses, task.courseId),
+            selected: wide && task.id == _selectedId,
+            // Sur tablette, la sélection remplit le panneau de droite.
+            onTap: wide
+                ? () => setState(() => _selectedId = task.id)
+                : () => context.push(Routes.tache(task.id)),
+            onToggle: (_) => _cocher(task),
+          );
+        },
+      ),
     );
   }
 
@@ -61,15 +78,16 @@ class _EcheancesScreenState extends ConsumerState<EcheancesScreen> {
       task: selected,
       courseName: courseName(courses, selected.courseId),
       onToggleDone: () => _cocher(selected),
+      onDelete: () => _supprimer(selected),
     );
   }
 
   @override
   Widget build(BuildContext context) {
     // ref.watch dans build : l'écran se reconstruit quand la liste change.
-    final tasks = ref.watch(tachesFiltreesProvider);
-    final allTasks = ref.watch(tachesProvider);
-    final courses = ref.watch(coursProvider);
+    final tasksAsync = ref.watch(tachesFiltreesProvider);
+    final allTasks = ref.watch(tachesProvider).value ?? const <Task>[];
+    final courses = ref.watch(coursProvider).value ?? const <Course>[];
     return Scaffold(
       appBar: AppBar(title: const Text('Mes échéances')),
       body: Column(
@@ -77,27 +95,32 @@ class _EcheancesScreenState extends ConsumerState<EcheancesScreen> {
         children: [
           const _FiltresBar(),
           Expanded(
-            child: LayoutBuilder(
-              builder: (context, constraints) {
-                final list = tasks.isEmpty
-                    ? const Center(child: Text('Aucune tâche dans ce filtre'))
-                    : _buildList(
-                        tasks,
-                        courses,
-                        wide: constraints.maxWidth >= tabletBreakpoint,
-                      );
-                if (constraints.maxWidth < tabletBreakpoint) return list;
-                // Au-dessus de 840 dp : liste et détail côte à côte.
-                return Row(
-                  crossAxisAlignment: CrossAxisAlignment.stretch,
-                  children: [
-                    SizedBox(width: 400, child: list),
-                    const VerticalDivider(width: 1),
-                    // Le détail reste affiché même si la tâche sort du filtre.
-                    Expanded(child: _buildDetailPane(allTasks, courses)),
-                  ],
-                );
-              },
+            // Trois états : chargement, erreur avec Réessayer, données.
+            child: tasksAsync.when(
+              loading: () => const LoadingView(),
+              error: (error, _) => ErrorView(
+                error: error,
+                onRetry: () => ref.invalidate(tachesProvider),
+              ),
+              data: (tasks) => LayoutBuilder(
+                builder: (context, constraints) {
+                  final wide = constraints.maxWidth >= tabletBreakpoint;
+                  final list = tasks.isEmpty
+                      ? const Center(child: Text('Aucune tâche dans ce filtre'))
+                      : _buildList(tasks, courses, wide: wide);
+                  if (!wide) return list;
+                  // Au-dessus de 840 dp : liste et détail côte à côte.
+                  return Row(
+                    crossAxisAlignment: CrossAxisAlignment.stretch,
+                    children: [
+                      SizedBox(width: 400, child: list),
+                      const VerticalDivider(width: 1),
+                      // Le détail reste affiché même si la tâche sort du filtre.
+                      Expanded(child: _buildDetailPane(allTasks, courses)),
+                    ],
+                  );
+                },
+              ),
             ),
           ),
         ],

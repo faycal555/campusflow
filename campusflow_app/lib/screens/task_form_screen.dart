@@ -5,6 +5,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../state/taches_notifier.dart';
 import '../theme/app_theme.dart';
 import '../utils/task_utils.dart';
+import '../widgets/async_views.dart';
 
 /// Formulaire de nouvelle tâche (route /taches/nouvelle).
 ///
@@ -57,14 +58,16 @@ class _TaskFormScreenState extends ConsumerState<TaskFormScreen> {
     final messenger = ScaffoldMessenger.of(context);
     final navigator = Navigator.of(context);
     try {
-      ref.read(tachesProvider.notifier).ajouter(task);
+      await ref.read(tachesProvider.notifier).ajouter(task);
       messenger.showSnackBar(
         SnackBar(content: Text('Tâche « ${task.title} » ajoutée')),
       );
       navigator.pop();
     } catch (e) {
       messenger.showSnackBar(
-        SnackBar(content: Text("Impossible d'ajouter la tâche : $e")),
+        SnackBar(
+          content: Text("Impossible d'ajouter la tâche. ${describeError(e)}"),
+        ),
       );
       if (mounted) setState(() => _saving = false);
     }
@@ -73,7 +76,7 @@ class _TaskFormScreenState extends ConsumerState<TaskFormScreen> {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    final courses = ref.watch(coursProvider);
+    final courses = ref.watch(coursProvider).value ?? const <Course>[];
     _courseId ??= courses.firstOrNull?.id;
     return Scaffold(
       appBar: AppBar(title: const Text('Nouvelle tâche')),
