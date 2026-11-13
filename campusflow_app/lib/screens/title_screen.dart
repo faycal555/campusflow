@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 
 import '../theme/app_theme.dart';
+import 'echeances_screen.dart';
 
 /// Écran de titre de la séance 4 : il ne lit que des valeurs du thème.
 class TitleScreen extends StatelessWidget {
@@ -39,7 +40,12 @@ class TitleScreen extends StatelessWidget {
                   ),
                 ),
                 const SizedBox(height: Spacing.xl),
-                FilledButton(onPressed: () {}, child: const Text('Commencer')),
+                FilledButton(
+                  onPressed: () => Navigator.of(context).pushReplacement(
+                    MaterialPageRoute(builder: (_) => const EcheancesScreen()),
+                  ),
+                  child: const Text('Commencer'),
+                ),
               ],
             ),
           ),
