@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:go_router/go_router.dart';
 import 'package:intl/date_symbol_data_local.dart';
 
 import 'router/app_router.dart';
@@ -14,24 +13,11 @@ Future<void> main() async {
   runApp(const ProviderScope(child: CampusFlowApp()));
 }
 
-class CampusFlowApp extends StatefulWidget {
+class CampusFlowApp extends ConsumerWidget {
   const CampusFlowApp({super.key});
 
   @override
-  State<CampusFlowApp> createState() => _CampusFlowAppState();
-}
-
-class _CampusFlowAppState extends State<CampusFlowApp> {
-  late final GoRouter _router = buildRouter();
-
-  @override
-  void dispose() {
-    _router.dispose();
-    super.dispose();
-  }
-
-  @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
     return MaterialApp.router(
       title: 'CampusFlow',
       debugShowCheckedModeBanner: false,
@@ -39,7 +25,7 @@ class _CampusFlowAppState extends State<CampusFlowApp> {
       locale: const Locale('fr', 'FR'),
       supportedLocales: const [Locale('fr', 'FR')],
       localizationsDelegates: GlobalMaterialLocalizations.delegates,
-      routerConfig: _router,
+      routerConfig: ref.watch(routerProvider),
     );
   }
 }

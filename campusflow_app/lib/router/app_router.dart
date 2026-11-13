@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
 import '../screens/app_shell.dart';
@@ -8,6 +9,7 @@ import '../screens/login_screen.dart';
 import '../screens/profil_screen.dart';
 import '../screens/task_detail_screen.dart';
 import '../screens/task_form_screen.dart';
+import '../state/auth_notifier.dart';
 
 /// Adresses de l'application.
 abstract final class Routes {
@@ -19,9 +21,26 @@ abstract final class Routes {
   static const profil = '/profil';
 }
 
-GoRouter buildRouter() {
-  return GoRouter(
+final routerProvider = Provider<GoRouter>((ref) {
+  // Prévient GoRouter à chaque changement de session pour réévaluer `redirect`.
+  final authState = ValueNotifier<AsyncValue<String?>>(ref.read(authProvider));
+  ref.listen(authProvider, (_, next) => authState.value = next);
+
+  final router = GoRouter(
+    // Pendant la lecture du jeton, on reste sur /login ; la redirection
+    // ouvre /taches dès qu'un jeton valide est trouvé.
     initialLocation: Routes.login,
+    refreshListenable: authState,
+    redirect: (context, state) {
+      final auth = authState.value;
+      if (auth.isLoading && !auth.hasValue) return null;
+      final loggedIn = auth.value != null;
+      final onLogin = state.matchedLocation == Routes.login;
+      // Pas de jeton (absent, ou refusé par un 401) : écran de connexion.
+      if (!loggedIn) return onLogin ? null : Routes.login;
+      if (onLogin) return Routes.taches;
+      return null;
+    },
     routes: [
       GoRoute(
         path: Routes.login,
@@ -64,4 +83,10 @@ GoRouter buildRouter() {
       body: Center(child: Text("L'adresse ${state.uri} n'existe pas.")),
     ),
   );
-}
+
+  ref.onDispose(() {
+    authState.dispose();
+    router.dispose();
+  });
+  return router;
+});

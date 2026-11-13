@@ -85,9 +85,10 @@ class _EcheancesScreenState extends ConsumerState<EcheancesScreen> {
   @override
   Widget build(BuildContext context) {
     // ref.watch dans build : l'écran se reconstruit quand la liste change.
-    final tasksAsync = ref.watch(tachesFiltreesProvider);
+    // Les sources avant le fournisseur dérivé qui en dépend.
     final allTasks = ref.watch(tachesProvider).value ?? const <Task>[];
     final courses = ref.watch(coursProvider).value ?? const <Course>[];
+    final tasksAsync = ref.watch(tachesFiltreesProvider);
     return Scaffold(
       appBar: AppBar(title: const Text('Mes échéances')),
       body: Column(

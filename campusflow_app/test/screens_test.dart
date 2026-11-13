@@ -1,3 +1,5 @@
+import 'package:campusflow_app/core/token_storage.dart';
+import 'package:campusflow_app/data/auth_repository.dart';
 import 'package:campusflow_app/data/fake_repositories.dart';
 import 'package:campusflow_app/data/repository_providers.dart';
 import 'package:campusflow_app/data/task_repository.dart';
@@ -10,17 +12,22 @@ import 'package:go_router/go_router.dart';
 import 'package:intl/date_symbol_data_local.dart';
 
 /// Lance l'application avec des repositories en mémoire (aucun réseau) et
-/// passe l'écran de connexion.
+/// se connecte avec le compte de démonstration.
 Future<void> pumpApp(WidgetTester tester, {TaskRepository? tasks}) async {
   await tester.pumpWidget(
     ProviderScope(
       overrides: [
+        tokenStorageProvider.overrideWithValue(MemoryTokenStorage()),
+        authRepositoryProvider.overrideWithValue(FakeAuthRepository()),
         taskRepositoryProvider.overrideWithValue(tasks ?? FakeTaskRepository()),
         courseRepositoryProvider.overrideWithValue(FakeCourseRepository()),
       ],
       child: const CampusFlowApp(),
     ),
   );
+  await tester.pumpAndSettle();
+  await tester.enterText(find.byType(TextFormField).at(0), 'aminata@campus.bf');
+  await tester.enterText(find.byType(TextFormField).at(1), 'campus2026');
   await tester.tap(find.text('Se connecter'));
   await tester.pumpAndSettle();
 }

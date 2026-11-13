@@ -8,6 +8,7 @@ import '../data/repository_providers.dart';
 /// L'écran affiche trois états : chargement, erreur (avec « Réessayer ») et
 /// données. L'état reste immuable : on assigne toujours une nouvelle liste.
 class TachesNotifier extends AsyncNotifier<List<Task>> {
+  // Rechargé à chaque connexion / déconnexion (voir AuthNotifier._resetData).
   @override
   Future<List<Task>> build() => ref.watch(taskRepositoryProvider).fetchAll();
 
@@ -35,19 +36,22 @@ class TachesNotifier extends AsyncNotifier<List<Task>> {
   }
 }
 
-final tachesProvider = AsyncNotifierProvider<TachesNotifier, List<Task>>(
-  TachesNotifier.new,
-  // Pas de nouvelle tentative automatique : l'utilisateur décide avec « Réessayer ».
-  retry: (_, _) => null,
-);
+// autoDispose : les données de session sont libérées quand plus aucun écran
+// ne les affiche (par exemple après une déconnexion).
+final tachesProvider =
+    AsyncNotifierProvider.autoDispose<TachesNotifier, List<Task>>(
+      TachesNotifier.new,
+      // Pas de nouvelle tentative automatique : l'utilisateur décide avec « Réessayer ».
+      retry: (_, _) => null,
+    );
 
-final coursProvider = FutureProvider<List<Course>>(
+final coursProvider = FutureProvider.autoDispose<List<Course>>(
   (ref) => ref.watch(courseRepositoryProvider).fetchAll(),
   retry: (_, _) => null,
 );
 
 /// Une tâche par son identifiant (null si elle n'existe pas ou pas encore chargée).
-final tacheProvider = Provider.family<Task?, String>(
+final tacheProvider = Provider.autoDispose.family<Task?, String>(
   (ref, id) =>
       ref.watch(tachesProvider).value?.where((t) => t.id == id).firstOrNull,
 );

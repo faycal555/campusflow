@@ -2,6 +2,10 @@ import 'package:dio/dio.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../state/auth_notifier.dart';
+import 'auth_interceptor.dart';
+import 'token_storage.dart';
+
 /// Adresse de l'API json-server.
 ///
 /// Sur l'émulateur Android, la machine hôte s'appelle 10.0.2.2 (localhost
@@ -26,4 +30,14 @@ Dio buildDio({String? baseUrl}) => Dio(
 );
 
 /// Client HTTP unique de l'application. Seuls les repositories l'utilisent.
-final dioProvider = Provider<Dio>((ref) => buildDio());
+final dioProvider = Provider<Dio>((ref) {
+  final dio = buildDio();
+  dio.interceptors.add(
+    AuthInterceptor(
+      storage: ref.watch(tokenStorageProvider),
+      // Session refusée par le serveur : retour à l'écran de connexion.
+      onUnauthorized: () => ref.read(authProvider.notifier).expire(),
+    ),
+  );
+  return dio;
+});
