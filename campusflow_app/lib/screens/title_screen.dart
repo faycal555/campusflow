@@ -16,7 +16,8 @@ class TitleScreen extends StatelessWidget {
     return Scaffold(
       body: SafeArea(
         child: Center(
-          child: Padding(
+          child: Container(
+            constraints: const BoxConstraints(maxWidth: 420),
             padding: const EdgeInsets.all(Spacing.l),
             child: Column(
               mainAxisSize: MainAxisSize.min,
