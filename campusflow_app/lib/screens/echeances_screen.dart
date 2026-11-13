@@ -5,6 +5,7 @@ import '../data/sample_data.dart';
 import '../utils/task_utils.dart';
 import '../widgets/task_tile.dart';
 import 'task_detail_screen.dart';
+import 'task_form_screen.dart';
 
 /// Écran Échéances : liste des tâches triées par date.
 class EcheancesScreen extends StatefulWidget {
@@ -41,6 +42,17 @@ class _EcheancesScreenState extends State<EcheancesScreen> {
     );
   }
 
+  void _openForm() {
+    Navigator.of(context).push(
+      MaterialPageRoute(
+        builder: (_) => TaskFormScreen(
+          courses: sampleCourses,
+          onSubmit: (task) async => setState(() => _tasks = [..._tasks, task]),
+        ),
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     final tasks = _sortedTasks;
@@ -60,7 +72,7 @@ class _EcheancesScreenState extends State<EcheancesScreen> {
       ),
       floatingActionButton: FloatingActionButton(
         tooltip: 'Ajouter une tâche',
-        onPressed: () {},
+        onPressed: _openForm,
         child: const Icon(Icons.add),
       ),
       bottomNavigationBar: NavigationBar(

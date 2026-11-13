@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:intl/date_symbol_data_local.dart';
 
 import 'screens/title_screen.dart';
@@ -19,6 +20,9 @@ class CampusFlowApp extends StatelessWidget {
       title: 'CampusFlow',
       debugShowCheckedModeBanner: false,
       theme: AppTheme.light,
+      locale: const Locale('fr', 'FR'),
+      supportedLocales: const [Locale('fr', 'FR')],
+      localizationsDelegates: GlobalMaterialLocalizations.delegates,
       home: const TitleScreen(),
     );
   }
