@@ -1,0 +1,18 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="400" height="840" viewBox="0 0 400 840" font-family="Arial, sans-serif">
+<rect width="100%" height="100%" fill="#f4f4f4"/>
+<text x="20" y="28" font-size="16" font-weight="700" fill="#222" text-anchor="start">Écran 4 — Nouvelle tâche (formulaire)</text>
+<g transform="translate(20,44)">
+<rect x="0" y="0" width="360" height="740" rx="24" fill="#fff" stroke="#222" stroke-width="3" />
+<text x="24" y="26" font-size="12" font-weight="400" fill="#222" text-anchor="start">9:41</text><text x="336" y="26" font-size="12" font-weight="400" fill="#222" text-anchor="end">▮▮▮ 4G</text>
+
+<line x1="0" y1="92" x2="360" y2="92" stroke="#bbb" stroke-width="1"/><text x="20" y="72" font-size="22" font-weight="400" fill="#222" text-anchor="start">←</text><text x="52" y="72" font-size="20" font-weight="700" fill="#222" text-anchor="start">Nouvelle tâche</text>
+<text x="24" y="126" font-size="12" font-weight="400" fill="#222" text-anchor="start">Titre *</text><rect x="20" y="134" width="320" height="52" rx="6" fill="#fff" stroke="#555" stroke-width="1.5" /><text x="36" y="166" font-size="14" font-weight="400" fill="#999" text-anchor="start">Ex. : TP Flutter</text>
+<text x="24" y="206" font-size="11" font-weight="700" fill="#000" text-anchor="start">Le titre est obligatoire</text>
+<text x="24" y="240" font-size="12" font-weight="400" fill="#222" text-anchor="start">Cours</text><rect x="20" y="248" width="320" height="52" rx="6" fill="#fff" stroke="#555" stroke-width="1.5" /><text x="36" y="280" font-size="14" font-weight="400" fill="#222" text-anchor="start">Développement mobile</text><text x="320" y="280" font-size="14" font-weight="400" fill="#222" text-anchor="end">▾</text>
+<text x="24" y="330" font-size="12" font-weight="400" fill="#222" text-anchor="start">Date limite</text><rect x="20" y="338" width="320" height="52" rx="6" fill="#fff" stroke="#555" stroke-width="1.5" /><text x="36" y="370" font-size="14" font-weight="400" fill="#222" text-anchor="start">lun. 16 nov. 2026</text><text x="320" y="370" font-size="14" font-weight="400" fill="#222" text-anchor="end">📅</text>
+<rect x="20" y="420" width="320" height="52" rx="26" fill="#ccc" stroke="#555" stroke-width="1.5" /><text x="180" y="452" font-size="14" font-weight="700" fill="#222" text-anchor="middle">Enregistrer</text>
+<rect x="20" y="640" width="320" height="44" rx="6" fill="#333" stroke="#333" stroke-width="1.5" /><text x="36" y="668" font-size="13" font-weight="400" fill="#fff" text-anchor="start">Tâche « TP Flutter » ajoutée</text>
+
+</g>
+<text x="20" y="806" font-size="11" font-weight="400" fill="#555" text-anchor="start">Route /taches/nouvelle — Form, validator (titre vide refusé),</text><text x="20" y="821" font-size="11" font-weight="400" fill="#555" text-anchor="start">SnackBar, écran défilant.</text>
+</svg>
