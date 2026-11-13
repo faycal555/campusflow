@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 
-import '../data/sample_data.dart';
 import '../screens/app_shell.dart';
 import '../screens/cours_screen.dart';
 import '../screens/echeances_screen.dart';
@@ -40,12 +39,7 @@ GoRouter buildRouter() {
               // prise pour un identifiant.
               GoRoute(
                 path: 'nouvelle',
-                // Provisoire : sans état partagé, la tâche créée n'est pas
-                // encore visible dans la liste (voir TachesNotifier).
-                builder: (context, state) => TaskFormScreen(
-                  courses: sampleCourses,
-                  onSubmit: (_) async {},
-                ),
+                builder: (context, state) => const TaskFormScreen(),
               ),
               GoRoute(
                 path: ':id',

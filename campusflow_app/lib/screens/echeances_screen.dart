@@ -1,9 +1,10 @@
 import 'package:campusflow_models/campusflow_models.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
-import '../data/sample_data.dart';
 import '../router/app_router.dart';
+import '../state/taches_notifier.dart';
 import '../utils/task_utils.dart';
 import '../widgets/task_detail_view.dart';
 import '../widgets/task_tile.dart';
@@ -12,87 +13,85 @@ import '../widgets/task_tile.dart';
 const tabletBreakpoint = 840.0;
 
 /// Écran Échéances : liste des tâches triées par date.
-class EcheancesScreen extends StatefulWidget {
+class EcheancesScreen extends ConsumerStatefulWidget {
   const EcheancesScreen({super.key});
 
   @override
-  State<EcheancesScreen> createState() => _EcheancesScreenState();
+  ConsumerState<EcheancesScreen> createState() => _EcheancesScreenState();
 }
 
-class _EcheancesScreenState extends State<EcheancesScreen> {
-  List<Task> _tasks = buildSampleTasks();
+class _EcheancesScreenState extends ConsumerState<EcheancesScreen> {
+  // Sélection locale à l'écran (vue tablette) : pas besoin de la partager.
   String? _selectedId;
 
-  List<Task> get _sortedTasks =>
-      [..._tasks]..sort((a, b) => a.dueDate.compareTo(b.dueDate));
+  // ref.read dans les gestionnaires d'action.
+  void _cocher(Task task) => ref.read(tachesProvider.notifier).cocher(task.id);
 
-  void _toggle(Task task, bool done) {
-    setState(() {
-      _tasks = [
-        for (final t in _tasks) t.id == task.id ? t.copyWith(isDone: done) : t,
-      ];
-    });
-  }
-
-  void _openDetail(Task task) => context.push(Routes.tache(task.id));
-
-  void _openForm() => context.push(Routes.nouvelleTache);
-
-  Widget _buildList(List<Task> tasks, {required bool wide}) {
+  Widget _buildList(
+    List<Task> tasks,
+    List<Course> courses, {
+    required bool wide,
+  }) {
     return ListView.builder(
       itemCount: tasks.length,
       itemBuilder: (context, index) {
         final task = tasks[index];
         return TaskTile(
           task: task,
-          courseName: courseName(sampleCourses, task.courseId),
+          courseName: courseName(courses, task.courseId),
           selected: wide && task.id == _selectedId,
           // Sur tablette, la sélection remplit le panneau de droite.
           onTap: wide
               ? () => setState(() => _selectedId = task.id)
-              : () => _openDetail(task),
-          onToggle: (done) => _toggle(task, done),
+              : () => context.push(Routes.tache(task.id)),
+          onToggle: (_) => _cocher(task),
         );
       },
     );
   }
 
-  Widget _buildDetailPane(List<Task> tasks) {
+  Widget _buildDetailPane(List<Task> tasks, List<Course> courses) {
     final selected = tasks.where((t) => t.id == _selectedId).firstOrNull;
     if (selected == null) {
       return const Center(child: Text('Sélectionnez une tâche'));
     }
     return TaskDetailView(
       task: selected,
-      courseName: courseName(sampleCourses, selected.courseId),
-      onToggleDone: () => _toggle(selected, !selected.isDone),
+      courseName: courseName(courses, selected.courseId),
+      onToggleDone: () => _cocher(selected),
     );
   }
 
   @override
   Widget build(BuildContext context) {
-    final tasks = _sortedTasks;
+    // ref.watch dans build : l'écran se reconstruit quand la liste change.
+    final tasks = [...ref.watch(tachesProvider)]
+      ..sort((a, b) => a.dueDate.compareTo(b.dueDate));
+    final courses = ref.watch(coursProvider);
     return Scaffold(
       appBar: AppBar(title: const Text('Mes échéances')),
       body: LayoutBuilder(
         builder: (context, constraints) {
           if (constraints.maxWidth < tabletBreakpoint) {
-            return _buildList(tasks, wide: false);
+            return _buildList(tasks, courses, wide: false);
           }
           // Au-dessus de 840 dp : liste et détail côte à côte.
           return Row(
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
-              SizedBox(width: 400, child: _buildList(tasks, wide: true)),
+              SizedBox(
+                width: 400,
+                child: _buildList(tasks, courses, wide: true),
+              ),
               const VerticalDivider(width: 1),
-              Expanded(child: _buildDetailPane(tasks)),
+              Expanded(child: _buildDetailPane(tasks, courses)),
             ],
           );
         },
       ),
       floatingActionButton: FloatingActionButton(
         tooltip: 'Ajouter une tâche',
-        onPressed: _openForm,
+        onPressed: () => context.push(Routes.nouvelleTache),
         child: const Icon(Icons.add),
       ),
     );

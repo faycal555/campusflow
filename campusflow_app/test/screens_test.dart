@@ -34,6 +34,37 @@ void main() {
     expect(find.text('Tâche « Nouveau TP » ajoutée'), findsOneWidget);
   });
 
+  testWidgets('Une tâche ajoutée ou cochée apparaît dans les autres écrans', (
+    tester,
+  ) async {
+    await pumpApp(tester);
+
+    // Ajout depuis le formulaire → visible dans la liste.
+    await tester.tap(find.byType(FloatingActionButton));
+    await tester.pumpAndSettle();
+    await tester.enterText(find.byType(TextFormField).first, 'Révision examen');
+    await tester.tap(find.text('Enregistrer'));
+    await tester.pumpAndSettle();
+    expect(find.text('Révision examen'), findsOneWidget);
+
+    // Cochée dans le détail → cochée dans la liste.
+    await tester.tap(find.text('Exercices SQL'));
+    await tester.pumpAndSettle();
+    await tester.tap(find.text('Marquer comme fait'));
+    await tester.pumpAndSettle();
+    expect(find.text('Faite'), findsOneWidget);
+    goTo(tester, '/taches');
+    await tester.pumpAndSettle();
+    final tile = find.ancestor(
+      of: find.text('Exercices SQL'),
+      matching: find.byType(ListTile),
+    );
+    final checkbox = tester.widget<Checkbox>(
+      find.descendant(of: tile, matching: find.byType(Checkbox)),
+    );
+    expect(checkbox.value, isTrue);
+  });
+
   testWidgets('Chaque écran est accessible par son adresse', (tester) async {
     await pumpApp(tester);
     expect(find.text('Mes échéances'), findsOneWidget);

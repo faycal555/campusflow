@@ -1,33 +1,26 @@
 import 'package:campusflow_models/campusflow_models.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../state/taches_notifier.dart';
 import '../theme/app_theme.dart';
 import '../utils/task_utils.dart';
 
-/// Formulaire de nouvelle tâche.
+/// Formulaire de nouvelle tâche (route /taches/nouvelle).
 ///
-/// Appelle [onSubmit] avec la tâche créée ; l'écran reste défilant pour ne pas
+/// Ajoute la tâche dans l'état partagé ; l'écran reste défilant pour ne pas
 /// être masqué par le clavier.
-class TaskFormScreen extends StatefulWidget {
-  final List<Course> courses;
-  final Future<void> Function(Task task) onSubmit;
-
-  const TaskFormScreen({
-    super.key,
-    required this.courses,
-    required this.onSubmit,
-  });
+class TaskFormScreen extends ConsumerStatefulWidget {
+  const TaskFormScreen({super.key});
 
   @override
-  State<TaskFormScreen> createState() => _TaskFormScreenState();
+  ConsumerState<TaskFormScreen> createState() => _TaskFormScreenState();
 }
 
-class _TaskFormScreenState extends State<TaskFormScreen> {
+class _TaskFormScreenState extends ConsumerState<TaskFormScreen> {
   final _formKey = GlobalKey<FormState>();
   final _titleController = TextEditingController();
-  late String? _courseId = widget.courses.isEmpty
-      ? null
-      : widget.courses.first.id;
+  String? _courseId;
   DateTime _dueDate = DateTime.now().add(const Duration(days: 7));
   bool _saving = false;
 
@@ -64,7 +57,7 @@ class _TaskFormScreenState extends State<TaskFormScreen> {
     final messenger = ScaffoldMessenger.of(context);
     final navigator = Navigator.of(context);
     try {
-      await widget.onSubmit(task);
+      ref.read(tachesProvider.notifier).ajouter(task);
       messenger.showSnackBar(
         SnackBar(content: Text('Tâche « ${task.title} » ajoutée')),
       );
@@ -80,6 +73,8 @@ class _TaskFormScreenState extends State<TaskFormScreen> {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
+    final courses = ref.watch(coursProvider);
+    _courseId ??= courses.firstOrNull?.id;
     return Scaffold(
       appBar: AppBar(title: const Text('Nouvelle tâche')),
       body: Form(
@@ -106,7 +101,7 @@ class _TaskFormScreenState extends State<TaskFormScreen> {
                 initialValue: _courseId,
                 decoration: const InputDecoration(labelText: 'Cours'),
                 items: [
-                  for (final course in widget.courses)
+                  for (final course in courses)
                     DropdownMenuItem(
                       value: course.id,
                       child: Text(course.name),

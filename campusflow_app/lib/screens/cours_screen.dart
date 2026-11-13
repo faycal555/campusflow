@@ -1,23 +1,29 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-import '../data/sample_data.dart';
+import '../state/taches_notifier.dart';
 import '../theme/app_theme.dart';
 
 /// Écran « Mes cours » (route /cours).
-class CoursScreen extends StatelessWidget {
+class CoursScreen extends ConsumerWidget {
   const CoursScreen({super.key});
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
     final theme = Theme.of(context);
+    final courses = ref.watch(coursProvider);
+    final tasks = ref.watch(tachesProvider);
     return Scaffold(
       appBar: AppBar(title: const Text('Mes cours')),
       body: ListView.separated(
         padding: const EdgeInsets.all(Spacing.m),
-        itemCount: sampleCourses.length,
+        itemCount: courses.length,
         separatorBuilder: (_, _) => const SizedBox(height: Spacing.s),
         itemBuilder: (context, index) {
-          final course = sampleCourses[index];
+          final course = courses[index];
+          final remaining = tasks
+              .where((t) => t.courseId == course.id && !t.isDone)
+              .length;
           return Card(
             margin: EdgeInsets.zero,
             child: ListTile(
@@ -28,6 +34,9 @@ class CoursScreen extends StatelessWidget {
               ),
               title: Text(course.name, style: theme.textTheme.titleMedium),
               subtitle: Text('${course.teacher} · ${course.credits} crédits'),
+              trailing: Text(
+                remaining <= 1 ? '$remaining tâche' : '$remaining tâches',
+              ),
             ),
           );
         },
