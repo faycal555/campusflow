@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import '../data/sample_data.dart';
 import '../utils/task_utils.dart';
 import '../widgets/task_tile.dart';
+import 'task_detail_screen.dart';
 
 /// Écran Échéances : liste des tâches triées par date.
 class EcheancesScreen extends StatefulWidget {
@@ -28,6 +29,18 @@ class _EcheancesScreenState extends State<EcheancesScreen> {
     });
   }
 
+  void _openDetail(Task task) {
+    Navigator.of(context).push(
+      MaterialPageRoute(
+        builder: (_) => TaskDetailScreen(
+          task: task,
+          courseName: courseName(sampleCourses, task.courseId),
+          onChanged: (updated) => _toggle(updated, updated.isDone),
+        ),
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     final tasks = _sortedTasks;
@@ -40,7 +53,7 @@ class _EcheancesScreenState extends State<EcheancesScreen> {
           return TaskTile(
             task: task,
             courseName: courseName(sampleCourses, task.courseId),
-            onTap: () {},
+            onTap: () => _openDetail(task),
             onToggle: (done) => _toggle(task, done),
           );
         },
