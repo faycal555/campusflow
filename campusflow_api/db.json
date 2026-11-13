@@ -1,0 +1,19 @@
+{
+  "taches": [
+    { "id": "t1", "title": "TP Flutter — écran détail", "courseId": "c1", "dueDate": "2026-11-16T08:00:00.000", "isDone": false },
+    { "id": "t2", "title": "Rapport de stage (plan)", "courseId": "c4", "dueDate": "2026-11-12T08:00:00.000", "isDone": false },
+    { "id": "t3", "title": "Exercices SQL", "courseId": "c2", "dueDate": "2026-11-18T08:00:00.000", "isDone": false },
+    { "id": "t4", "title": "Exposé cloud", "courseId": "c3", "dueDate": "2026-11-20T08:00:00.000", "isDone": false },
+    { "id": "t5", "title": "Lecture chapitre 2", "courseId": "c2", "dueDate": "2026-11-10T08:00:00.000", "isDone": true },
+    { "id": "t6", "title": "Rendu final CampusFlow", "courseId": "c1", "dueDate": "2026-11-22T23:59:00.000", "isDone": false }
+  ],
+  "cours": [
+    { "id": "c1", "name": "Développement mobile", "teacher": "M. Compaoré", "credits": 4 },
+    { "id": "c2", "name": "Bases de données", "teacher": "Mme Kaboré", "credits": 3 },
+    { "id": "c3", "name": "Cloud computing", "teacher": "M. Sawadogo", "credits": 3 },
+    { "id": "c4", "name": "Optimisation linéaire", "teacher": "M. Traoré", "credits": 4 }
+  ],
+  "utilisateurs": [
+    { "id": "u1", "name": "Aminata Ouédraogo", "email": "aminata@campus.bf", "password": "campus2026" }
+  ]
+}

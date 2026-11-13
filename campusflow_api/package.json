@@ -1,0 +1,13 @@
+{
+  "name": "campusflow-api",
+  "version": "1.0.0",
+  "private": true,
+  "description": "API REST simulée de CampusFlow (json-server)",
+  "scripts": {
+    "prestart": "node -e \"require('fs').copyFileSync('db.json', 'db.runtime.json')\"",
+    "start": "json-server --watch db.runtime.json --host 0.0.0.0 --port 3000"
+  },
+  "devDependencies": {
+    "json-server": "0.17.4"
+  }
+}

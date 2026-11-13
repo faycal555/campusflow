@@ -1,0 +1,3 @@
+node_modules/
+# Copie de travail modifiée par le serveur (db.json reste la référence).
+db.runtime.json
